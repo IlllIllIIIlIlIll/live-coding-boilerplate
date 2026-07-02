@@ -1,15 +1,29 @@
 const jwt = require('jsonwebtoken');
+const { User } = require('../models');
 
-/**
- * TODO: implementasikan verifikasi JWT.
- * - Ambil token dari header Authorization: Bearer <token>
- * - Jika tidak ada token -> balas 401
- * - Verifikasi dengan jwt.verify(token, process.env.JWT_SECRET)
- * - Jika valid, tempelkan payload ke req.user lalu panggil next()
- * - Jika invalid/expired -> balas 401
- */
-function authMiddleware(req, res, next) {
-  res.status(501).json({ message: 'authMiddleware belum diimplementasikan' });
+async function authMiddleware(req, res, next) {
+  const header = req.headers.authorization || '';
+  const [scheme, token] = header.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    return res.status(401).json({ message: 'Token tidak ditemukan' });
+  }
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(payload.id, {
+      attributes: { exclude: ['password'] },
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Token tidak valid' });
+    }
+
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Token tidak valid atau kedaluwarsa' });
+  }
 }
 
 module.exports = authMiddleware;

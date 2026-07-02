@@ -1,13 +1,14 @@
-/**
- * TODO: implementasikan pembatasan akses berdasarkan role.
- * Contoh pemakaian: roleMiddleware(['admin'])
- * - Jika req.user belum ada -> 401
- * - Jika req.user.role tidak termasuk allowedRoles -> 403
- * - Jika lolos -> next()
- */
 function roleMiddleware(allowedRoles = []) {
   return (req, res, next) => {
-    res.status(501).json({ message: 'roleMiddleware belum diimplementasikan' });
+    if (!req.user) {
+      return res.status(401).json({ message: 'Belum terautentikasi' });
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Tidak memiliki akses' });
+    }
+
+    next();
   };
 }
 
