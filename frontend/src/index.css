@@ -255,6 +255,29 @@ a {
   margin: 16px 0;
 }
 
+/* Dashboard stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2933;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #52606d;
+  margin-top: 4px;
+}
+
 .badge {
   display: inline-block;
   padding: 2px 8px;
