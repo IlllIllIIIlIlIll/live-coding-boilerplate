@@ -1,12 +1,35 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-// TODO: definisikan field sesuai SPEC.md bagian 4, tabel `units`:
-// id (PK, auto increment), nama_unit, alamat, pemilik_id (FK -> users.id), status (enum aktif/nonaktif)
 const Unit = sequelize.define(
   'Unit',
   {
-    // TODO: isi definisi kolom di sini
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    nama_unit: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    alamat: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    pemilik_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+    },
+    status: {
+      type: DataTypes.ENUM('aktif', 'nonaktif'),
+      allowNull: false,
+      defaultValue: 'aktif',
+    },
   },
   {
     tableName: 'units',

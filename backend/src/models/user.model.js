@@ -1,13 +1,41 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-// TODO: definisikan field sesuai SPEC.md bagian 4, tabel `users`:
-// id (PK, auto increment), nama, email (unique, nullable), no_hp (unique, nullable),
-// password (nullable, hashed), google_id (unique, nullable), role (enum admin/pemilik)
 const User = sequelize.define(
   'User',
   {
-    // TODO: isi definisi kolom di sini
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    nama: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING(100),
+      unique: true,
+      allowNull: true,
+    },
+    no_hp: {
+      type: DataTypes.STRING(20),
+      unique: true,
+      allowNull: true,
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    google_id: {
+      type: DataTypes.STRING(100),
+      unique: true,
+      allowNull: true,
+    },
+    role: {
+      type: DataTypes.ENUM('admin', 'pemilik'),
+      allowNull: false,
+    },
   },
   {
     tableName: 'users',
