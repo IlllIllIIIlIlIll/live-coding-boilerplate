@@ -1,18 +1,25 @@
-/**
- * TODO: implementasikan OTP service sesuai SPEC.md bagian 5.
- * Boleh in-memory (Map) untuk kebutuhan tes, atau tabel DB terpisah.
- *
- * generateOtp(target): buat kode 6 digit, simpan dengan masa berlaku
- *   (env OTP_EXPIRES_MINUTES), lalu kembalikan/cetak kodenya (tidak perlu SMS/email asli).
- * verifyOtp(target, kode): true jika kode cocok & belum kedaluwarsa, lalu one-time use.
- */
+const otpStore = new Map();
 
 function generateOtp(target) {
-  throw new Error('generateOtp belum diimplementasikan');
+  const kode = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresMinutes = Number(process.env.OTP_EXPIRES_MINUTES || 5);
+  const expired_at = new Date(Date.now() + expiresMinutes * 60 * 1000);
+
+  otpStore.set(target, { kode, expired_at, is_used: false });
+
+  return { kode, expired_at };
 }
 
 function verifyOtp(target, kode) {
-  throw new Error('verifyOtp belum diimplementasikan');
+  const entry = otpStore.get(target);
+
+  if (!entry) return false;
+  if (entry.is_used) return false;
+  if (entry.expired_at < new Date()) return false;
+  if (entry.kode !== kode) return false;
+
+  entry.is_used = true;
+  return true;
 }
 
 module.exports = { generateOtp, verifyOtp };

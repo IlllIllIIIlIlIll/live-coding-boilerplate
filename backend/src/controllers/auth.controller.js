@@ -2,10 +2,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const { User } = require('../models');
+const otpService = require('../services/otp.service');
 
 /**
- * TODO: implementasikan 2 metode login yang tersisa sesuai SPEC.md bagian 5:
- * (1) Email + OTP, (3) Google.
+ * TODO: implementasikan metode login yang tersisa sesuai SPEC.md bagian 5: (3) Google.
  */
 
 function signToken(user) {
@@ -16,12 +16,51 @@ function signToken(user) {
 
 // POST /api/auth/otp/request  { target } -> target = email
 async function requestOtp(req, res, next) {
-  res.status(501).json({ message: 'requestOtp belum diimplementasikan' });
+  try {
+    const { target } = req.body;
+
+    if (!target) {
+      return res.status(400).json({ message: 'target wajib diisi' });
+    }
+
+    const { kode, expired_at } = otpService.generateOtp(target);
+
+    // Untuk kebutuhan tes: OTP dikembalikan di response (bukan email gateway asli).
+    console.log(`[OTP] target=${target} kode=${kode} expired_at=${expired_at.toISOString()}`);
+    res.json({ message: 'OTP berhasil dibuat', kode_otp: kode, expired_at });
+  } catch (err) {
+    next(err);
+  }
 }
 
 // POST /api/auth/otp/verify  { target, kode_otp }
+// Kebijakan: jika belum ada user dengan email tersebut, login ditolak (403) —
+// hanya admin yang boleh membuat akun pemilik (lihat CRUD Pemilik).
 async function verifyOtpLogin(req, res, next) {
-  res.status(501).json({ message: 'verifyOtpLogin belum diimplementasikan' });
+  try {
+    const { target, kode_otp } = req.body;
+
+    if (!target || !kode_otp) {
+      return res.status(400).json({ message: 'target dan kode_otp wajib diisi' });
+    }
+
+    const valid = otpService.verifyOtp(target, kode_otp);
+    if (!valid) {
+      return res.status(401).json({ message: 'Kode OTP tidak valid atau kedaluwarsa' });
+    }
+
+    const user = await User.findOne({ where: { email: target } });
+    if (!user) {
+      return res.status(403).json({ message: 'Akun untuk email ini belum terdaftar' });
+    }
+
+    const token = signToken(user);
+    const { password: _password, ...userData } = user.toJSON();
+
+    res.json({ token, user: userData });
+  } catch (err) {
+    next(err);
+  }
 }
 
 // POST /api/auth/login  { identifier, password }
