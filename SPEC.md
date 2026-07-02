@@ -1,6 +1,6 @@
 # Spesifikasi Tes Live Coding — Aplikasi Web Member
 
-**Durasi:** 2–3 jam (onsite)
+**Durasi:** 4–6 jam (onsite)
 **Stack:** Node.js + Express (backend), React (frontend), MySQL (database), Sequelize (ORM)
 **Arsitektur:** MVC pada backend dan frontend
 
@@ -22,7 +22,7 @@ Aplikasi web manajemen member (misalnya untuk pengelolaan unit properti/aparteme
 | **Unit** | Unit properti yang dimiliki oleh seorang pemilik |
 | **Tagihan** | Tagihan yang terikat pada sebuah unit |
 
-### Hak akses (RBAC)
+### Hak akses (Role Based Access Control)
 
 | Aksi | Admin | Pemilik |
 |---|---|---|
@@ -131,25 +131,18 @@ frontend/
 
 ---
 
-## 5. Autentikasi — 4 Metode Login
+## 5. Autentikasi — 3 Metode Login
 
 Semua metode login berujung pada penerbitan **JWT** (access token) yang dipakai untuk request selanjutnya via header `Authorization: Bearer <token>`.
 
-### (1) No HP + OTP
-1. `POST /api/auth/otp/request` — body `{ no_hp }` → generate kode OTP (6 digit), simpan dengan masa berlaku (misal 5 menit). Untuk kebutuhan tes, OTP cukup dikembalikan di response/log (tidak perlu SMS gateway asli).
-2. `POST /api/auth/otp/verify` — body `{ no_hp, kode_otp }` → jika valid & belum expired, cari/buat user, terbitkan JWT.
+### (1) Email + OTP
+1. `POST /api/auth/otp/request` — body `{ target }` (email) → generate kode OTP (6 digit), simpan dengan masa berlaku (misal 5 menit). Untuk kebutuhan tes, OTP cukup dikembalikan di response/log (tidak perlu email gateway asli).
+2. `POST /api/auth/otp/verify` — body `{ target, kode_otp }` → jika valid & belum expired, cari/buat user, terbitkan JWT.
 
-### (2) Email + OTP
-Sama seperti di atas, tapi target berupa email:
-- `POST /api/auth/otp/request` — body `{ email }`
-- `POST /api/auth/otp/verify` — body `{ email, kode_otp }`
-
-(Boleh menyatukan endpoint OTP request/verify untuk email & no_hp menjadi satu endpoint dengan field `target`, asal jelas dan konsisten.)
-
-### (3) No HP/Email + Password
+### (2) No HP/Email + Password
 - `POST /api/auth/login` — body `{ identifier, password }` di mana `identifier` bisa email atau no_hp. Verifikasi dengan bcrypt, terbitkan JWT.
 
-### (4) Integrasi Google Login
+### (3) Integrasi Google Login
 - `GET /api/auth/google` — redirect ke consent screen Google (misal via `passport-google-oauth20`).
 - `GET /api/auth/google/callback` — terima profile dari Google, cari user berdasarkan `google_id`/email; jika belum ada, buat user baru dengan role default (`pemilik`); terbitkan JWT dan redirect ke frontend dengan token.
 
@@ -205,7 +198,7 @@ Sama seperti di atas, tapi target berupa email:
 ## 7. Kebutuhan Frontend (React)
 
 ### Halaman
-- `Login` — mendukung 4 metode (tab/opsi: OTP no HP, OTP email, password, tombol "Login dengan Google").
+- `Login` — mendukung 3 metode (tab/opsi: OTP email, password (email/no HP), tombol "Login dengan Google").
 - `Dashboard` — ringkasan sesuai role.
 - `Pemilik` (list, tambah, edit, hapus) — hanya untuk admin.
 - `Unit` (list, tambah, edit, hapus untuk admin; list read-only untuk pemilik).
@@ -221,24 +214,24 @@ Sama seperti di atas, tapi target berupa email:
 
 ---
 
-## 8. Tahapan & Alokasi Waktu (2–3 jam onsite)
+## 8. Tahapan & Alokasi Waktu (4–6 jam onsite)
 
-Karena waktu terbatas, tes dibagi menjadi **Wajib (MVP)** dan **Bonus**. Kandidat dinilai dari seberapa jauh progres pada bagian wajib dengan kualitas kode yang baik, bukan dari menyelesaikan semua fitur secara terburu-buru.
+Dengan waktu yang lebih longgar, kandidat diharapkan menyelesaikan seluruh bagian **Wajib** — termasuk ketiga metode login dan form tambah/edit di frontend (bukan cuma list) — lalu mengerjakan **Bonus** jika waktu tersisa.
 
-### Wajib (± 2 jam)
-1. Setup project + skema database + model **Sequelize** (termasuk asosiasi) untuk User, Unit, Tagihan. *(~20 menit)*
-2. Login dengan **salah satu** metode OTP (email atau no HP) **dan** login password — minimal 2 dari 4 metode. *(~30 menit)*
-3. Middleware auth + role-based access control. *(~15 menit)*
-4. CRUD Unit dan Tagihan dari sisi backend, dengan aturan akses admin vs pemilik. *(~30 menit)*
-5. Frontend minimal: halaman login + halaman list Unit & Tagihan yang terhubung ke API sesuai role. *(~25 menit)*
+### Wajib (± 3.5–4.5 jam)
+1. Setup project + skema database + model **Sequelize** (termasuk asosiasi) untuk User, Unit, Tagihan/Invoice. *(~30 menit)*
+2. Autentikasi 3 metode: Email + OTP, No HP/Email + Password, dan Google OAuth. *(~75–90 menit)*
+3. Middleware auth + role-based access control. *(~20 menit)*
+4. CRUD lengkap Unit dan Tagihan (backend + frontend, termasuk form tambah/edit) dengan aturan akses admin vs pemilik. *(~90 menit)*
+5. CRUD Pemilik dari sisi admin (backend + frontend). *(~45 menit)*
+6. Frontend: seluruh halaman terhubung API, protected route berbasis role, komponen reusable. *(~30 menit)*
 
 ### Bonus (jika waktu tersisa)
-- Implementasi 2 metode login sisanya (OTP no HP/email lainnya, Google OAuth).
-- CRUD Pemilik dari sisi admin (backend + frontend).
-- Form tambah/edit di frontend (bukan hanya list).
-- Validasi/error handling yang lebih lengkap, pagination, atau pencarian.
+- Validasi/error handling yang lebih lengkap, pagination, atau pencarian/filter.
+- Ringkasan statistik di Dashboard (jumlah unit, total tagihan belum bayar, dsb).
+- Unit test dasar untuk salah satu endpoint.
 
-### Demo & wawancara (± 15–20 menit di akhir)
+### Demo & wawancara (± 20–30 menit di akhir)
 - Kandidat mendemokan fitur yang berhasil dibuat.
 - Interviewer bertanya seputar keputusan desain: kenapa struktur folder begitu, bagaimana menangani keamanan password/OTP/JWT, bagaimana skalanya jika data besar, dsb.
 
@@ -259,7 +252,7 @@ Karena waktu terbatas, tes dibagi menjadi **Wajib (MVP)** dan **Bonus**. Kandida
 
 ## 10. Yang Disediakan ke Kandidat
 
-- Starter repo kosong (atau boilerplate `create-react-app`/Vite + Express skeleton) — opsional, sesuai kebijakan tim.
+- Starter repo (folder ini) berisi skeleton kosong: struktur folder, dependencies, koneksi server & database sudah jalan, tapi model/controller/middleware/halaman React masih TODO.
 - Akses MySQL lokal (kredensial/connection string).
 - Dokumen spesifikasi ini.
 - Kredensial Google OAuth Client ID/Secret jika bagian Google login ingin dinilai (bisa disiapkan panitia agar kandidat tidak perlu bikin sendiri).

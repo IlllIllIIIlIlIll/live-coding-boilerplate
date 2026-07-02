@@ -1,7 +1,7 @@
 {
   "name": "tes-live-coding-backend",
   "version": "1.0.0",
-  "description": "Backend boilerplate (Express + Sequelize, MVC) untuk tes live coding",
+  "description": "Starter backend (Express + Sequelize, MVC) untuk tes live coding",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

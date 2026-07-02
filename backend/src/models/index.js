@@ -3,14 +3,13 @@ const User = require('./user.model');
 const Unit = require('./unit.model');
 const Tagihan = require('./tagihan.model');
 
-// Asosiasi
-// User (role pemilik) 1 - N Unit
-User.hasMany(Unit, { foreignKey: 'pemilik_id', as: 'units' });
-Unit.belongsTo(User, { foreignKey: 'pemilik_id', as: 'pemilik' });
-
-// Unit 1 - N Tagihan
-Unit.hasMany(Tagihan, { foreignKey: 'unit_id', as: 'tagihans' });
-Tagihan.belongsTo(Unit, { foreignKey: 'unit_id', as: 'unit' });
+// TODO: definisikan asosiasi antar model sesuai SPEC.md bagian 4 (Relasi):
+// - User (role pemilik) 1 - N Unit  (foreign key: units.pemilik_id)
+// - Unit 1 - N Tagihan/invoices     (foreign key: invoices.unit_id)
+//
+// Contoh pola (lengkapi sendiri):
+// User.hasMany(Unit, { foreignKey: 'pemilik_id', as: 'units' });
+// Unit.belongsTo(User, { foreignKey: 'pemilik_id', as: 'pemilik' });
 
 module.exports = {
   sequelize,

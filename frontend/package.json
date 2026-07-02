@@ -1,7 +1,7 @@
 {
   "name": "tes-live-coding-frontend",
   "version": "1.0.0",
-  "description": "Frontend boilerplate (React + Vite, MVC) untuk tes live coding",
+  "description": "Starter frontend (React + Vite, MVC) untuk tes live coding",
   "type": "module",
   "scripts": {
     "dev": "vite",

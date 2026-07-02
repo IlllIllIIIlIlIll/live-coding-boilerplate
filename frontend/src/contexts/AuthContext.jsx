@@ -1,35 +1,24 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import api from '../services/api';
+import { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
 
+/**
+ * TODO: implementasikan state auth global:
+ * - Saat provider dimuat (useEffect), cek token di localStorage,
+ *   lalu panggil GET /auth/me untuk ambil data user (lihat ../services/api).
+ * - loginWithToken(token, userData): simpan token ke localStorage & set state user.
+ * - logout(): hapus token dari localStorage & reset state user.
+ */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    api
-      .get('/auth/me')
-      .then((res) => setUser(res.data))
-      .catch(() => {
-        localStorage.removeItem('token');
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const [loading, setLoading] = useState(false);
 
   function loginWithToken(token, userData) {
-    localStorage.setItem('token', token);
-    setUser(userData);
+    // TODO: implementasikan
   }
 
   function logout() {
-    localStorage.removeItem('token');
-    setUser(null);
+    // TODO: implementasikan
   }
 
   return (
