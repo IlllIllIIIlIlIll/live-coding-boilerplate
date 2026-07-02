@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import Card from '../components/Card';
 import Button from '../components/Button';
+import Input from '../components/Input';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import EntityForm from '../components/EntityForm';
@@ -21,6 +22,17 @@ export default function UnitPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [modalUnit, setModalUnit] = useState(null); // null = closed, {} = create, {...} = edit
+  const [search, setSearch] = useState('');
+
+  const filteredUnits = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return units;
+    return units.filter((u) =>
+      [u.nama_unit, u.alamat, u.pemilik?.nama, u.status].some((field) =>
+        (field || '').toLowerCase().includes(q)
+      )
+    );
+  }, [units, search]);
 
   async function fetchUnits() {
     setLoading(true);
@@ -108,12 +120,18 @@ export default function UnitPage() {
 
       <Card>
         {error && <div className="error-text">{error}</div>}
+        <Input
+          name="search"
+          placeholder="Cari nama unit, alamat, atau pemilik..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         {loading ? (
           <p>Memuat...</p>
         ) : (
           <DataTable
             columns={columns}
-            rows={units}
+            rows={filteredUnits}
             actions={
               isAdmin
                 ? (row) => (

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import api from '../services/api';
 import Card from '../components/Card';
 import Button from '../components/Button';
+import Input from '../components/Input';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import EntityForm from '../components/EntityForm';
@@ -11,6 +12,15 @@ export default function PemilikPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [modalItem, setModalItem] = useState(null);
+  const [search, setSearch] = useState('');
+
+  const filteredPemilik = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return pemilik;
+    return pemilik.filter((p) =>
+      [p.nama, p.email, p.no_hp].some((field) => (field || '').toLowerCase().includes(q))
+    );
+  }, [pemilik, search]);
 
   async function fetchPemilik() {
     setLoading(true);
@@ -95,12 +105,18 @@ export default function PemilikPage() {
 
       <Card>
         {error && <div className="error-text">{error}</div>}
+        <Input
+          name="search"
+          placeholder="Cari nama, email, atau no HP..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         {loading ? (
           <p>Memuat...</p>
         ) : (
           <DataTable
             columns={columns}
-            rows={pemilik}
+            rows={filteredPemilik}
             actions={(row) => (
               <>
                 <Button variant="secondary" onClick={() => setModalItem(row)}>

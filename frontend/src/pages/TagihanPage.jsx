@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import Card from '../components/Card';
 import Button from '../components/Button';
+import Input from '../components/Input';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import EntityForm from '../components/EntityForm';
@@ -29,6 +30,17 @@ export default function TagihanPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [modalItem, setModalItem] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  const filteredTagihan = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return tagihan.filter((t) => {
+      if (statusFilter && t.status !== statusFilter) return false;
+      if (!q) return true;
+      return [t.unit?.nama_unit, t.periode].some((field) => (field || '').toLowerCase().includes(q));
+    });
+  }, [tagihan, search, statusFilter]);
 
   async function fetchTagihan() {
     setLoading(true);
@@ -128,12 +140,28 @@ export default function TagihanPage() {
 
       <Card>
         {error && <div className="error-text">{error}</div>}
+        <div className="filter-row">
+          <Input
+            name="search"
+            placeholder="Cari nama unit atau periode..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <select className="input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <option value="">Semua Status</option>
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
         {loading ? (
           <p>Memuat...</p>
         ) : (
           <DataTable
             columns={columns}
-            rows={tagihan}
+            rows={filteredTagihan}
             actions={
               isAdmin
                 ? (row) => (

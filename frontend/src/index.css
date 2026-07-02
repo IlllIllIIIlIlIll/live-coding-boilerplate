@@ -163,6 +163,21 @@ a {
   margin-bottom: 16px;
 }
 
+.filter-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.filter-row .form-group {
+  flex: 1;
+}
+
+.filter-row select.input {
+  width: 200px;
+  height: 38px;
+}
+
 .form-actions {
   display: flex;
   gap: 8px;
