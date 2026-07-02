@@ -1,7 +1,13 @@
-/**
- * TODO: implementasikan card reusable untuk membungkus konten halaman
- * (Dashboard, Unit, Tagihan, Pemilik). Gunakan class .card, .card-title dari index.css.
- */
-export default function Card({ title, children, actions }) {
-  return <div>{children}</div>;
+export default function Card({ title, children, actions, className = '' }) {
+  return (
+    <div className={`card ${className}`.trim()}>
+      {(title || actions) && (
+        <div className="card-header">
+          {title && <div className="card-title">{title}</div>}
+          {actions}
+        </div>
+      )}
+      {children}
+    </div>
+  );
 }

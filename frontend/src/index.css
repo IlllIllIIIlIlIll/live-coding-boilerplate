@@ -60,6 +60,17 @@ a {
   margin-bottom: 8px;
 }
 
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.card-header .card-title {
+  margin-bottom: 0;
+}
+
 /* Button */
 .btn {
   display: inline-block;
@@ -161,6 +172,32 @@ a {
   color: #dc2626;
   font-size: 13px;
   margin-top: 4px;
+}
+
+.helper-text {
+  color: #52606d;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.divider {
+  text-align: center;
+  color: #9aa5b1;
+  font-size: 13px;
+  margin: 16px 0;
 }
 
 .badge {
