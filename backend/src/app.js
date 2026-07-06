@@ -8,7 +8,17 @@ const errorMiddleware = require('./middlewares/error.middleware');
 
 const app = express();
 
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
+// FRONTEND_URL boleh berisi beberapa origin dipisah koma (misal untuk akses
+// dari HP via LAN IP sekaligus localhost saat development).
+const allowedOrigins = (process.env.FRONTEND_URL || '*')
+  .split(',')
+  .map((o) => o.trim());
+
+app.use(
+  cors({
+    origin: allowedOrigins.includes('*') ? '*' : allowedOrigins,
+  })
+);
 app.use(express.json());
 app.use(passport.initialize());
 

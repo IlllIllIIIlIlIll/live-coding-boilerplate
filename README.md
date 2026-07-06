@@ -91,6 +91,8 @@ Frontend berjalan di `http://localhost:5173`.
 | `JWT_SECRET`, `JWT_EXPIRES_IN` | Signing secret & masa berlaku token JWT |
 | `OTP_EXPIRES_MINUTES` | Masa berlaku kode OTP |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL` | Kredensial dari Google Cloud Console (OAuth Client ID) |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Keypair untuk Web Push (generate: `node -e "console.log(require('web-push').generateVAPIDKeys())"`) |
+| `PUSH_POLL_INTERVAL_MS` | Interval polling tagihan jatuh tempo untuk push notification (default 60000) |
 
 ### `frontend/.env`
 | Variabel | Keterangan |
@@ -125,6 +127,57 @@ Frontend berjalan di `http://localhost:5173`.
   client-side, langsung di atas data yang sudah difilter backend sesuai role.
 - **Ringkasan statistik di Dashboard** sesuai role (lihat `Dashboard.jsx`).
 - **Test dasar** untuk endpoint auth (`backend/tests/auth.test.js`).
+- **Push notification untuk admin dan pemilik** saat ada tagihan belum bayar yang
+  lewat jatuh tempo — pakai Web Push (browser push, bukan aplikasi native), lihat
+  bagian di bawah.
+
+### Push Notification (Tagihan Jatuh Tempo)
+
+Admin **dan** pemilik bisa mengaktifkan notifikasi push dari kartu "Notifikasi
+Push" di Dashboard (kartu ini muncul untuk kedua role, dengan teks yang
+disesuaikan). Backend menjalankan poller (`services/pushPoller.service.js`,
+interval `PUSH_POLL_INTERVAL_MS`) yang mencari tagihan `belum_bayar` dengan
+`jatuh_tempo` yang sudah lewat dan `notified_at` masih `NULL`, lalu mengirim push
+via `web-push` (VAPID) ke:
+- **semua admin** yang sudah subscribe (notifikasi mencakup semua tagihan, lintas
+  unit/pemilik), dan
+- **pemilik pemilik unit tersebut** secara spesifik (notifikasi hanya tentang
+  tagihannya sendiri, dengan teks berbeda: "Tagihan Anda Jatuh Tempo").
+
+Setelah dikirim, `notified_at` ditandai supaya tidak mengirim ulang di siklus
+poller berikutnya.
+
+**Cara tes manual (sesuai skenario "trigger dari DB"):**
+
+Sekali saja per tagihan, buat dulu tagihan yang overdue:
+
+```
+cd backend
+npm run reset-notif -- <id_tagihan> --overdue
+```
+
+(atau langsung lewat SQL: `UPDATE invoices SET jatuh_tempo = '2020-01-01', status =
+'belum_bayar', notified_at = NULL WHERE id = <id_tagihan>;`)
+
+Setelah itu, tombol **"Reset & Kirim Ulang (demo)"** di Dashboard sudah cukup
+untuk memicu ulang tagihan yang sama berkali-kali — tombol ini (dan endpoint
+`POST /api/push/check-now` di baliknya) selalu me-reset `notified_at` semua
+tagihan yang sedang overdue+belum_bayar dulu sebelum mengirim, jadi tidak akan
+pernah melaporkan "0 tagihan dinotifikasi" selama masih ada tagihan yang
+overdue. Notifikasi akan muncul sebagai push notification asli dari browser
+(bukan simulasi/toast in-app).
+
+**Catatan platform:**
+- **Android (Chrome/Edge/Firefox):** langsung bekerja, browser tidak perlu
+  sedang dibuka.
+- **iPhone (Safari):** hanya bekerja jika situs sudah di-*Add to Home Screen*
+  (iOS 16.4+) — Safari tidak mengirim push ke tab biasa, ini pembatasan dari
+  iOS sendiri.
+- **Testing dengan Playwright/Chromium:** subscription Push API **tidak berhasil**
+  di context incognito (dibatasi Chrome secara sengaja) maupun di build Chromium
+  bawaan Playwright (tidak ada API key Google untuk push service) — perlu
+  `launchPersistentContext` + `channel: 'chrome'` (Chrome asli) untuk pengujian
+  end-to-end yang sesungguhnya.
 
 ## Catatan
 

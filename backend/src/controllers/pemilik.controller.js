@@ -10,7 +10,7 @@ async function getAll(req, res, next) {
   try {
     const pemilik = await User.findAll({
       where: { role: 'pemilik' },
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ['password', 'push_subscription'] },
       order: [['id', 'ASC']],
     });
     res.json(pemilik);
@@ -24,7 +24,7 @@ async function getById(req, res, next) {
   try {
     const pemilik = await User.findOne({
       where: { id: req.params.id, role: 'pemilik' },
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ['password', 'push_subscription'] },
     });
 
     if (!pemilik) {

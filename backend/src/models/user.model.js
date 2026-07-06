@@ -15,12 +15,12 @@ const User = sequelize.define(
     },
     email: {
       type: DataTypes.STRING(100),
-      unique: true,
+      unique: 'users_email_unique',
       allowNull: true,
     },
     no_hp: {
       type: DataTypes.STRING(20),
-      unique: true,
+      unique: 'users_no_hp_unique',
       allowNull: true,
     },
     password: {
@@ -29,12 +29,16 @@ const User = sequelize.define(
     },
     google_id: {
       type: DataTypes.STRING(100),
-      unique: true,
+      unique: 'users_google_id_unique',
       allowNull: true,
     },
     role: {
       type: DataTypes.ENUM('admin', 'pemilik'),
       allowNull: false,
+    },
+    push_subscription: {
+      type: DataTypes.JSON,
+      allowNull: true,
     },
   },
   {

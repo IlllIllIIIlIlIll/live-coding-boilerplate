@@ -1,6 +1,7 @@
 require('dotenv').config();
 const app = require('./app');
 const { sequelize } = require('./models');
+const pushPoller = require('./services/pushPoller.service');
 
 const PORT = process.env.PORT || 5000;
 
@@ -11,6 +12,8 @@ async function start() {
 
     // Untuk kebutuhan tes/demo cukup pakai sync. Untuk produksi, gunakan migration.
     await sequelize.sync({ alter: true });
+
+    pushPoller.start(Number(process.env.PUSH_POLL_INTERVAL_MS) || 60000);
 
     app.listen(PORT, () => {
       console.log(`Server berjalan di http://localhost:${PORT}`);

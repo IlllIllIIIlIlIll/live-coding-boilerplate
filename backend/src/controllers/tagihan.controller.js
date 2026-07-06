@@ -1,6 +1,19 @@
 const { Tagihan, Unit, User } = require('../models');
+const { checkOverdueInvoices } = require('../services/pushPoller.service');
 
 const PERIODE_REGEX = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+// Cek & kirim push segera setelah tagihan dibuat/diubah, kalau state barunya
+// sudah overdue+belum_bayar — supaya tidak perlu menunggu poller/klik tombol
+// demo untuk kasus "baru saja diedit jadi overdue". Tidak pernah melempar error
+// ke response CRUD kalau pengiriman push gagal.
+async function triggerPushCheckSilently() {
+  try {
+    await checkOverdueInvoices();
+  } catch (err) {
+    console.error('Push check setelah CRUD tagihan gagal:', err.message);
+  }
+}
 
 const unitInclude = {
   model: Unit,
@@ -71,6 +84,8 @@ async function create(req, res, next) {
       tanggal_bayar: tanggal_bayar || null,
     });
 
+    await triggerPushCheckSilently();
+
     res.status(201).json(tagihan);
   } catch (err) {
     next(err);
@@ -107,7 +122,13 @@ async function update(req, res, next) {
     if (jatuh_tempo !== undefined) tagihan.jatuh_tempo = jatuh_tempo;
     if (tanggal_bayar !== undefined) tagihan.tanggal_bayar = tanggal_bayar;
 
+    // Reset guard notifikasi di setiap edit — supaya tiap kali tagihan disimpan
+    // dan overdue+belum_bayar, notifikasi selalu terkirim ulang (bukan cuma
+    // sekali saat transisi pertama ke status overdue).
+    tagihan.notified_at = null;
+
     await tagihan.save();
+    await triggerPushCheckSilently();
     res.json(tagihan);
   } catch (err) {
     next(err);

@@ -12,7 +12,7 @@ async function authMiddleware(req, res, next) {
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findByPk(payload.id, {
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ['password', 'push_subscription'] },
     });
 
     if (!user) {

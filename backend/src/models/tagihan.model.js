@@ -41,6 +41,10 @@ const Tagihan = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
+    notified_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: 'invoices', // nama tabel di DB "invoices" (model/JS tetap disebut Tagihan)

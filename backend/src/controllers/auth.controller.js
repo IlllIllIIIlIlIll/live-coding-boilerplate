@@ -51,7 +51,7 @@ async function verifyOtpLogin(req, res, next) {
     }
 
     const token = signToken(user);
-    const { password: _password, ...userData } = user.toJSON();
+    const { password: _password, push_subscription: _pushSub, ...userData } = user.toJSON();
 
     res.json({ token, user: userData });
   } catch (err) {
@@ -84,7 +84,7 @@ async function loginWithPassword(req, res, next) {
     }
 
     const token = signToken(user);
-    const { password: _password, ...userData } = user.toJSON();
+    const { password: _password, push_subscription: _pushSub, ...userData } = user.toJSON();
 
     res.json({ token, user: userData });
   } catch (err) {
@@ -100,7 +100,9 @@ async function getMe(req, res, next) {
 // GET /api/auth/google/callback (dipanggil setelah passport.authenticate berhasil)
 function googleCallback(req, res) {
   const token = signToken(req.user);
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  // FRONTEND_URL boleh berisi beberapa origin dipisah koma (untuk CORS saat akses
+  // via LAN IP) — redirect Google OAuth selalu pakai origin pertama (localhost).
+  const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').split(',')[0].trim();
   res.redirect(`${frontendUrl}/login?token=${token}`);
 }
 
