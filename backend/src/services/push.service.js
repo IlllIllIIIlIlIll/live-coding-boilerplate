@@ -1,4 +1,5 @@
 const webpush = require('web-push');
+const { getMessaging } = require('firebase-admin/messaging');
 const { User } = require('../models');
 const { initFirebaseAdmin } = require('../config/firebaseAdmin');
 
@@ -16,7 +17,7 @@ async function sendFcm(user, payload) {
   if (!admin || !user.fcm_token) return null;
 
   try {
-    await admin.messaging().send({
+    await getMessaging().send({
       token: user.fcm_token,
       notification: { title: payload.title, body: payload.body },
       data: payload.data
