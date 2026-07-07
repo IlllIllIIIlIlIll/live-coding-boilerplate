@@ -84,6 +84,19 @@ export default function Login() {
         <Button variant="secondary" onClick={handleGoogleLogin} style={{ width: '100%' }}>
           Login dengan Google
         </Button>
+
+        <p className="helper-text" style={{ textAlign: 'center', marginTop: 16, marginBottom: 8 }}>
+          Untuk mengunduh aplikasi Android, silakan klik tombol di bawah ini.
+        </p>
+        <a
+          href="/MyJarrdinApp.apk"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn btn-secondary"
+          style={{ width: '100%', display: 'block', textAlign: 'center', textDecoration: 'none' }}
+        >
+          Unduh Aplikasi Android
+        </a>
       </Card>
     </div>
   );

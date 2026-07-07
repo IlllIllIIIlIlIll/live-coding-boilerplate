@@ -11,7 +11,9 @@ async function start() {
     console.log('Koneksi database berhasil.');
 
     // Untuk kebutuhan tes/demo cukup pakai sync. Untuk produksi, gunakan migration.
-    await sequelize.sync({ alter: true });
+    // DB_SYNC_ALTER=false saat DB_HOST mengarah ke database production (hindari alter schema live).
+    const shouldAlter = process.env.DB_SYNC_ALTER !== 'false';
+    await sequelize.sync(shouldAlter ? { alter: true } : {});
 
     pushPoller.start(Number(process.env.PUSH_POLL_INTERVAL_MS) || 60000);
 

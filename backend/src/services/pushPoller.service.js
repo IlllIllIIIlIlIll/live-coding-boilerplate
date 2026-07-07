@@ -14,17 +14,17 @@ async function checkOverdueInvoices() {
       jatuh_tempo: { [Op.lt]: new Date() },
     },
     include: [
-      { model: Unit, as: 'unit', include: [{ model: User, as: 'pemilik', attributes: ['id', 'nama', 'push_subscription'] }] },
+      { model: Unit, as: 'unit', include: [{ model: User, as: 'pemilik', attributes: ['id', 'nama', 'push_subscription', 'fcm_token'] }] },
     ],
   });
 
   const notified = [];
 
   for (const inv of overdue) {
-    const jumlahFormatted = new Intl.NumberFormat('id-ID').format(Number(inv.jumlah));
+    const unitName = inv.unit?.nama_unit || inv.unit_id;
     const adminPayload = {
       title: 'Tagihan Jatuh Tempo',
-      body: `Unit ${inv.unit?.nama_unit || inv.unit_id} (${inv.unit?.pemilik?.nama || '-'}) periode ${inv.periode} — Rp${jumlahFormatted} sudah melewati jatuh tempo.`,
+      body: `Unit ${unitName} periode ${inv.periode}.\nHarap segera melunasi tagihan.`,
       data: { tagihanId: inv.id, unitId: inv.unit_id },
     };
 
@@ -33,8 +33,8 @@ async function checkOverdueInvoices() {
     let pemilikResults = [];
     if (inv.unit?.pemilik) {
       const pemilikPayload = {
-        title: 'Tagihan Anda Jatuh Tempo',
-        body: `Tagihan unit ${inv.unit.nama_unit} periode ${inv.periode} — Rp${jumlahFormatted} sudah melewati jatuh tempo. Segera lakukan pembayaran.`,
+        title: 'Tagihan Jatuh Tempo',
+        body: `Unit ${unitName} periode ${inv.periode}.\nHarap segera melunasi tagihan.`,
         data: { tagihanId: inv.id, unitId: inv.unit_id },
       };
       pemilikResults = await sendToUsers([inv.unit.pemilik], pemilikPayload);

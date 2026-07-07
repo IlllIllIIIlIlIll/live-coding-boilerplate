@@ -51,7 +51,7 @@ async function verifyOtpLogin(req, res, next) {
     }
 
     const token = signToken(user);
-    const { password: _password, push_subscription: _pushSub, ...userData } = user.toJSON();
+    const { password: _password, push_subscription: _pushSub, fcm_token: _fcmToken, ...userData } = user.toJSON();
 
     res.json({ token, user: userData });
   } catch (err) {
@@ -84,7 +84,7 @@ async function loginWithPassword(req, res, next) {
     }
 
     const token = signToken(user);
-    const { password: _password, push_subscription: _pushSub, ...userData } = user.toJSON();
+    const { password: _password, push_subscription: _pushSub, fcm_token: _fcmToken, ...userData } = user.toJSON();
 
     res.json({ token, user: userData });
   } catch (err) {

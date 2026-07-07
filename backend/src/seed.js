@@ -4,7 +4,8 @@ const { sequelize, User, Unit, Tagihan } = require('./models');
 
 async function seed() {
   await sequelize.authenticate();
-  await sequelize.sync({ alter: true });
+  const shouldAlter = process.env.DB_SYNC_ALTER !== 'false';
+  await sequelize.sync(shouldAlter ? { alter: true } : {});
 
   const adminPassword = await bcrypt.hash('admin123', 10);
   const [admin] = await User.findOrCreate({

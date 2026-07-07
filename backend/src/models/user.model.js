@@ -40,6 +40,10 @@ const User = sequelize.define(
       type: DataTypes.JSON,
       allowNull: true,
     },
+    fcm_token: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
   },
   {
     tableName: 'users',

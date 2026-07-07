@@ -250,6 +250,11 @@ a {
   margin-top: 8px;
 }
 
+.helper-text a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
 .login-page {
   min-height: 100vh;
   display: flex;
