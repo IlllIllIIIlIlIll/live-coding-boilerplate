@@ -40,4 +40,5 @@ jobs:
             mv .deploy-tmp/package-lock.json .
             rm -rf .deploy-tmp
             npm ci --omit=dev
-            pm2 restart favian-api
+            pm2 restart favian-api || pm2 start src/server.js --name favian-api
+            pm2 save
