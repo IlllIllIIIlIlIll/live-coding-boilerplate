@@ -1,0 +1,43 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload backend files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_API_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: 'backend/src/**,backend/package.json,backend/package-lock.json'
+          target: 'htdocs/favian-api.srusun.id/.deploy-tmp'
+          strip_components: 1
+
+      - name: Install deps and restart
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_API_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd htdocs/favian-api.srusun.id
+            rm -rf src
+            mv .deploy-tmp/src .
+            mv .deploy-tmp/package.json .
+            mv .deploy-tmp/package-lock.json .
+            rm -rf .deploy-tmp
+            npm ci --omit=dev
+            pm2 restart favian-api
